@@ -1,22 +1,22 @@
-const Categoria  = require('../models/Categoria.js');  
+const Chesse  = require('../models/Chesse.js');  
 const bcryptjs = require ('bcryptjs');
 
 
-const postCategoria = async(req, res ) => {
+const postChesse = async(req, res ) => {
     const nombre = req.body.nombre.toUpperCase();
-    const categoriaDB = await Categoria.findOne({ nombre });
-    if ( categoriaDB ) {
+    const chesseDB = await Chesse.findOne({ nombre });
+    if ( chesseDB ) {
         return res.status(400).json({
-            msg: `La categoria ${ categoriaDB.nombre }, ya existe`
+            msg: `el Chesse ${ chesseDB.nombre }, ya existe`
         });
     }
     const data = {
         nombre,
-        usuario: req.usuario._id
+        chesse: req.chesse._id
     }
-    const categoria = new Categoria( data );
-    await categoria.save();
-    res.status(201).json(categoria);
+    const chesse = new Chesse( data );
+    await chesse.save();
+    res.status(201).json(chesse);
 
 }
 
@@ -76,7 +76,7 @@ const putCate = async (req, res)=>{
 
 
 module.exports = {
-    postCategoria ,
+    postChesse ,
     getCategoria,
     deleteCate,
     putCate

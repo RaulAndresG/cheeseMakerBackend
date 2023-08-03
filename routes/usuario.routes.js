@@ -6,8 +6,6 @@ const { isAdminRole } = require('../middlewares/validate.role.js');
 // 5. se importA validador de rol desde helpers
 //10.  se importa validador de emailExiste
 const { isValidRole, emailExiste, userExistsById } = require('../helpers/db.validators.js');
-
-
 const { getUsers, 
         postUsers, 
         deleteUsers, 
@@ -16,9 +14,11 @@ const { getUsers,
 
 
         
-const router = Router();
+const router = Router(); 
 
 router.get("/", getUsers);
+
+
 router.post("/",[
         check('nombre', 'Nombre no es valido').not().isEmpty(),
         check('password', 'Password debe ser de minimo 6 letras').isLength({min :6}),

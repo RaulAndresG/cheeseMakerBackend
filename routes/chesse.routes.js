@@ -7,7 +7,7 @@ const { isAdminRole  } = require('../middlewares/validate.role.js');
 
 
 
-const {  CateExiste, userExistsById } = require('../helpers/db.validators.js');
+const {CateExiste,} = require('../helpers/db.validators.js');
 
 
 
@@ -23,7 +23,7 @@ const router = Router();
 router.get("/",[
 
       check('objetcId','Objeto no valido').not().isEmpty(),
-      check('categoria').custom(CateExiste),
+      check('categoria').custom(CateExiste ),
       
 
 ],getCategoria)

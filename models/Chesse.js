@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const CategoriaSchema = Schema({
+const ChesseSchema = Schema({
     nombre: {
         type: String,
         required: [true, 'El nombre es obligatorio'],
@@ -11,7 +11,7 @@ const CategoriaSchema = Schema({
         default: true,
         required: true
     },
-    usuario: {
+    chesse: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true

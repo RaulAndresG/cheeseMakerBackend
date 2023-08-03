@@ -21,7 +21,13 @@ const isValidRole = async(rol= '')=>{
         throw new Error(`El email: ${ email }, ya está registrado`);
     }
  }
-
+ const CateExiste = async( categoria = '' ) => {
+    const existeCate = await Cate.findOne({categoria});
+    if(existeCate){
+        //12.  Gestionamos error.
+        throw new Error(`La categoria: ${ categoria }, ya está registrada`);
+    }
+ }
  //14.  Declaramos funcion de validacion de existencia de usuario por el ID findById
  const userExistsById = async( id ) => {
 
@@ -33,6 +39,7 @@ const isValidRole = async(rol= '')=>{
 }
 
 module.exports = {
+    CateExiste, 
     isValidRole,
     // 8. exporto validador perzonalizado emailExiste
     emailExiste,
