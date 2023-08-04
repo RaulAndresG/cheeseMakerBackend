@@ -31,7 +31,7 @@ router.post("/",[
         check('rol').custom(isValidRole),
         validateDocuments
 ] ,postUsers);
-//18. Agrego :id a endpoint delete
+//18. Agrego :id a end point delete
 router.delete("/:id", [
 //23. Se Crea nuevo Middleware "validate.JWT" en carpeta, para evitar que 
 //se ejecute esta ruta borrar, sino existe un json web token valido

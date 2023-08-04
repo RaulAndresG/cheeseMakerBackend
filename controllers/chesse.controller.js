@@ -1,85 +1,99 @@
-const Chesse  = require('../models/Chesse.js');  
-const bcryptjs = require ('bcryptjs');
+const { response } = require('express');
+const  Cheese  = require('../models/Cheese.js');
 
 
-const postChesse = async(req, res ) => {
-    const nombre = req.body.nombre.toUpperCase();
-    const chesseDB = await Chesse.findOne({ nombre });
-    if ( chesseDB ) {
-        return res.status(400).json({
-            msg: `el Chesse ${ chesseDB.nombre }, ya existe`
-        });
-    }
-    const data = {
-        nombre,
-        chesse: req.chesse._id
-    }
-    const chesse = new Chesse( data );
-    await chesse.save();
-    res.status(201).json(chesse);
+const getCheeses = async(req, res = response ) => {
 
-}
+    const { until = 5, from = 0 } = req.query;
+    const query = { state: true };
 
-
-
-const getCategoria= async(req, res)=>{
-    const { hasta, desde } = req.query;
-    const query = { estado: true };
-//const usuarios = await Usuario.find(query)
-//   .skip(Number( desde ))
-//   .limit(Number( hasta ))
-//const total = await Usuario.countDocuments(query)
-    const [ chesse , categoria ] = await Promise.all([
-        Cate.countDocuments(query),
-        Cate.find(query)
-        .populate('usuario', ['nombre', 'email'])
+    const [ total, cheeses ] = await Promise.all([
+        Cheese.countDocuments(query),
+        Cheese.find(query)
+            .populate('usuario', 'nombre')
+            .populate('categoria', 'nombre')
+            .skip( Number( from ) )
+            .limit(Number( until ))
     ]);
 
     res.json({
-        chesse,
-        categoria
+        total,
+        cheeses
     });
 }
-const deleteCate = async (req, res)=>{
-    //19.  extraigo y respondo id pasado como parametro desde postman
-    const {id} = req.params
-    //20. borrado fisico en DB
-   /*  const usuario = await Usuario.findByIdAndDelete(id); */
-    //21.  borrado virtual.  solo se cambia el estado a false del usuario asociado al id en cuestion
-    const categoria = await Cate.findByIdAndUpdate( id, { estado: false } );
-    res.json(categoria)
+
+  const getCheese = async(req, res = response ) => {
+
+    const { id } = req.params;
+    const  cheese = await  Cheese.findById( id )
+                            .populate('usuario', 'nombre')
+                            .populate('categoria', 'nombre');
+
+    res.json( cheese );
+
 }
 
-const putCate = async (req, res)=>{
-    /* 1- http put ini*/
-      const { id } = req.params;
-      //Extraigo lo que NO necesito que se registre en MONGODB
-      // incluyendo el object _id de mongodb
-      const { _id, password, googleSignIn, ...resto } = req.body;
-      if ( password ) {
-          // Encriptar la contraseña
-          const salt = bcryptjs.genSaltSync();
-          resto.password = bcryptjs.hashSync( password, salt );
-  }
-      //Busca documento por el id y actualiza lo deseado(resto) de la coleccion.
-      const categoria = await Cate.findByIdAndUpdate( id, resto );
-      res.json({
-          msg:"categoria Actualizado",
-          categoria : categoria
-      });
-       /* 1- http put fin */
-  }
 
+const postCheese = async(req, res = response ) => {
 
+    const { state, usuario, ...body } = req.body;
 
+    const cheeseDB = await Cheese.findOne({ name: body.name });
+
+    if ( cheeseDB ) {
+        return res.status(400).json({
+            msg: `that cheese ${ cheeseDB.name }, ya existe`
+        });
+    }
+
+    // Generar la data a guardar
+    const data = {
+        ...body,
+        name: body.name.toUpperCase(),
+        usuario: req.usuario._id
+    }
+
+    const cheese = new Cheese( data );
+
+    // Guardar DB
+    await cheese.save();
+
+    res.status(201).json(cheese);
+
+}
+
+const putCheese = async( req, res = response ) => {
+
+    const { id } = req.params;
+    const { state, usuario, ...data } = req.body;
+
+    if( data.name ) {
+        data.name  = data.name.toUpperCase();
+    }
+
+    data.usuario = req.usuario._id;
+
+    const cheese = await Cheese.findByIdAndUpdate(id, data, { new: true });
+
+    res.json( cheese );
+
+}
+
+const deleteCheese = async(req, res = response ) => {
+
+    const { id } = req.params;
+    const cheeseDeleted = await Cheese.findByIdAndUpdate( id, { state: false }, {new: true });
+
+    res.json( cheeseDeleted );
+} 
+ 
 
 
 
 module.exports = {
-    postChesse ,
-    getCategoria,
-    deleteCate,
-    putCate
-
- 
+    getCheeses,
+    getCheese,
+    postCheese,
+    putCheese,
+    deleteCheese  
 }

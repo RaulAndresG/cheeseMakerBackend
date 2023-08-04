@@ -1,23 +1,39 @@
 const { Schema, model } = require('mongoose');
 
-const ChesseSchema = Schema({
-    nombre: {
+const CheeseSchema = Schema({
+    name: {
         type: String,
-        required: [true, 'El nombre es obligatorio'],
+        required: [true, 'Name is required'],
         unique: true
     },
-    estado: {
+    state: {
         type: Boolean,
         default: true,
         required: true
     },
-    chesse: {
+    usuario: {
         type: Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
-    }
+    },
+    price: {
+        type: Number,
+        default: 0
+    },
+    categoria: {
+        type: Schema.Types.ObjectId,
+        ref: 'Categoria',
+        required: true
+    },
+    description: { type: String },
+    available: { type: Boolean, default: true },a
 });
 
 
+CheeseSchema.methods.toJSON = function() {
+    const { __v, state, ...data  } = this.toObject();
+    return data;
+}
 
-module.exports = model('Categoria',CategoriaSchema );
+
+module.exports = model( 'Cheese', CheeseSchema );

@@ -1,85 +1,90 @@
+const { response } = require('express');
 const Categoria  = require('../models/Categoria.js');  
-const bcryptjs = require ('bcryptjs');
-
 
 const postCategoria = async(req, res ) => {
+
     const nombre = req.body.nombre.toUpperCase();
+
     const categoriaDB = await Categoria.findOne({ nombre });
+
     if ( categoriaDB ) {
         return res.status(400).json({
             msg: `La categoria ${ categoriaDB.nombre }, ya existe`
         });
     }
+   /*  console.log("usuario:",usuario); */
+    // Generar la data a guardar
     const data = {
         nombre,
         usuario: req.usuario._id
     }
+
+    
     const categoria = new Categoria( data );
+
+    // Guardar DB
     await categoria.save();
+
     res.status(201).json(categoria);
 
 }
 
+const getCategorias = async(req, res = response ) => {
 
-
-const getCategoria= async(req, res)=>{
-    const { hasta, desde } = req.query;
+    const { hasta = 8, desde = 0 } = req.query;
     const query = { estado: true };
-//const usuarios = await Usuario.find(query)
-//   .skip(Number( desde ))
-//   .limit(Number( hasta ))
-//const total = await Usuario.countDocuments(query)
-    const [ chesse , categoria ] = await Promise.all([
-        Cate.countDocuments(query),
-        Cate.find(query)
-        .populate('usuario', ['nombre', 'email'])
+
+    const [ total, categorias ] = await Promise.all([
+        Categoria.countDocuments(query),
+        Categoria.find(query)
+            .populate('usuario', ['nombre', 'email'])
+            .skip( Number( desde ) )
+            .limit(Number( hasta ))
     ]);
 
     res.json({
-        chesse,
-        categoria
+        total,
+        categorias
     });
 }
-const deleteCate = async (req, res)=>{
-    //19.  extraigo y respondo id pasado como parametro desde postman
-    const {id} = req.params
-    //20. borrado fisico en DB
-   /*  const usuario = await Usuario.findByIdAndDelete(id); */
-    //21.  borrado virtual.  solo se cambia el estado a false del usuario asociado al id en cuestion
-    const categoria = await Cate.findByIdAndUpdate( id, { estado: false } );
-    res.json(categoria)
+
+const getCategoria = async(req, res = response ) => {
+
+    const { id } = req.params;
+    const categoria = await Categoria.findById( id )
+                            .populate('usuario', 'nombre');
+
+    res.json( categoria );
+
 }
 
-const putCate = async (req, res)=>{
-    /* 1- http put ini*/
-      const { id } = req.params;
-      //Extraigo lo que NO necesito que se registre en MONGODB
-      // incluyendo el object _id de mongodb
-      const { _id, password, googleSignIn, ...resto } = req.body;
-      if ( password ) {
-          // Encriptar la contraseña
-          const salt = bcryptjs.genSaltSync();
-          resto.password = bcryptjs.hashSync( password, salt );
-  }
-      //Busca documento por el id y actualiza lo deseado(resto) de la coleccion.
-      const categoria = await Cate.findByIdAndUpdate( id, resto );
-      res.json({
-          msg:"categoria Actualizado",
-          categoria : categoria
-      });
-       /* 1- http put fin */
-  }
+const putCategoria = async( req, res = response ) => {
 
+    const { id } = req.params;
+    const { estado, usuario, ...data } = req.body;
 
+    data.nombre  = data.nombre.toUpperCase();
+    data.usuario = req.usuario._id;
 
+    const categoria = await Categoria.findByIdAndUpdate(id, data, { new: true });
 
+    res.json( categoria );
 
+}
+
+const delCategoria = async(req, res =response ) => {
+
+    const { id } = req.params;
+    const categoriaEliminada = await Categoria.findByIdAndUpdate( id, { estado: false }, {new: true });
+
+    res.json( categoriaEliminada );
+}
 
 module.exports = {
-    postCategoria ,
+    postCategoria,
+    getCategorias,
     getCategoria,
-    deleteCate,
-    putCate
-
- 
+    putCategoria,
+    delCategoria
 }
+
